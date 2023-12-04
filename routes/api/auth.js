@@ -1,7 +1,7 @@
 const express = require("express");
 
 const authCtrl = require("../../controllers/authDecor");
-const validateBody = require("../../middlewares/validateBody");
+const { validateBody, authent } = require("../../middlewares");
 const { schemas } = require("../../models/user");
 
 
@@ -12,6 +12,12 @@ router.post("/register", validateBody(schemas.registerSchema), authCtrl.register
 
 // sign in
 router.post("/login", validateBody(schemas.loginSchema), authCtrl.login);
+
+
+router.get("/current", authent, authCtrl.getCurrent)
+
+
+router.post("/logout", authent, authCtrl.logout);
 
 
 module.exports = router;

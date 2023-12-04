@@ -3,7 +3,7 @@ const { MongooseError } = require("../helpers");
 
 const Joi = require("joi");
 
-const emailRegexp = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/; // example@example.com
+const emailRegexp = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/; // example@example.com
 
 const userSchema = new Schema(
   {
@@ -27,10 +27,10 @@ const userSchema = new Schema(
       enum: ["starter", "pro", "business"],
       default: "starter",
     },
-    // {
-    //     token: String,
-    //     default: null,
-    // }
+    token: {
+      type: String,
+      default: "",
+    },
   },
   {
     versionKey: false,

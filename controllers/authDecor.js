@@ -21,7 +21,6 @@ const register = async (req, res) => {
     email: newUser.email,
     name: newUser.name,
   });
-
 };
 
 const login = async (req, res) => {
@@ -41,16 +40,36 @@ const login = async (req, res) => {
     id: user._id,
   };
 
-  const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "23h" });
-
+  const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "1d" });
+  await User.findByIdAndUpdate(user._id, { token });
+  
   res.json({
     token,
   });
-
-  
 };
+
+const getCurrent = async (req, res) => {
+  const { email, name } = req.user;
+
+  res.json({
+    email,
+    name,
+  });
+};
+
+const logout = async (req, res) => {
+  const { _id } = req.user;
+  await User.findByIdAndUpdate(_id, { token: "" });
+
+  res.json({
+    message: "Logout success"
+  })
+}
+
 
 module.exports = {
   register: CtrlWrapper(register),
   login: CtrlWrapper(login),
+  getCurrent: CtrlWrapper(getCurrent),
+  logout: CtrlWrapper(logout),
 };

@@ -9,8 +9,7 @@ const { User } = require("../models/user");
 const { HttpError, CtrlWrapper } = require("../helpers");
 const { JWT_SECRET } = process.env;
 
-const avatarsDir = path.join(__dirname, "../", "public",  "avatars");
-
+const avatarsDir = path.join(__dirname, "../", "public", "avatars");
 
 const register = async (req, res) => {
   const { email, password } = req.body;
@@ -23,8 +22,11 @@ const register = async (req, res) => {
   const passwordHash = await bcrypt.hash(password, 10);
   const avatarURL = gravatar.url(email);
 
-
-  const newUser = await User.create({ ...req.body, password: passwordHash, avatarURL});
+  const newUser = await User.create({
+    ...req.body,
+    password: passwordHash,
+    avatarURL,
+  });
 
   res.status(201).json({
     email: newUser.email,
@@ -51,7 +53,7 @@ const login = async (req, res) => {
 
   const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "1d" });
   await User.findByIdAndUpdate(user._id, { token });
-  
+
   res.json({
     token,
   });
@@ -71,29 +73,32 @@ const logout = async (req, res) => {
   await User.findByIdAndUpdate(_id, { token: "" });
 
   res.json({
-    message: "Logout success"
-  })
+    message: "Logout success",
+  });
 };
 
 const updateAvatar = async (req, res) => {
+  if (!req.file) {
+    throw HttpError(400, "Image change error, please try again!");
+  }
+
   const { _id } = req.user;
   const { path: tempUpload, originalname } = req.file;
 
   const image = await Jimp.read(tempUpload);
   image.resize(250, 250).quality(60).write(path.join(tempUpload));
 
-  const filename = `${_id}_${originalname}`
+  const filename = `${_id}_${originalname}`;
   const resultUpload = path.join(avatarsDir, filename);
   await fs.rename(tempUpload, resultUpload);
-  
+
   const avatarURL = path.join("avatars", filename);
   await User.findByIdAndUpdate(_id, { avatarURL });
 
   res.json({
     avatarURL,
-  })
+  });
 };
-
 
 module.exports = {
   register: CtrlWrapper(register),
